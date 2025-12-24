@@ -5,4 +5,5 @@ use (
 	./instances/holder
 	./instances/issuer
 	./instances/verifier
+	./lib
 )
