@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/rpc"
@@ -65,6 +66,35 @@ func (v *VAR) CreateDIDDocument(args *CreateDIDDocumentArgs, reply *did.DIDDocum
 
 	*reply = result
 	return nil
+}
+
+// GetDIDDocument retuns the DIDDocument for the assosiated did
+func (v *VAR) GetDIDDocument(didString string, reply *did.DIDDocument) error {
+	var result did.DIDDocument
+	var error error
+
+	if !did.ValidadeDID(didString) {
+		message := fmt.Sprintf(`string "%s" is not a valide DID, please check DID syntax at: [https://www.w3.org/TR/did-1.0/#did-syntax]`, didString)
+		error = errors.New(message)
+	}
+
+	var found bool
+	for _, doc := range storage {
+		docDidString, err := doc.Did.GetDID()
+		if err == nil && docDidString == didString {
+			result = doc
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		message := fmt.Sprintf("no did Document found with the did: %s", didString)
+		error = errors.New(message)
+	}
+
+	*reply = result
+	return error
 }
 
 func main() {
