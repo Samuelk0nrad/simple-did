@@ -3,6 +3,8 @@ package did
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
 )
 
 // DID is a simple text string consisting of three parts:
@@ -59,6 +61,41 @@ func (d *DID) GetDID() (string, error) {
 	}
 
 	return result, error
+}
+
+// ParseStringToDID parses a string into a DID object, if it has a valide did
+// syntax else a error gets returned
+func ParseStringToDID(did string) (DID, error) {
+	var result DID
+	var error error
+
+	if ValidadeDID(did) {
+		split := strings.Split(did, ":")
+		if len(split) == 3 {
+			result = DID{
+				Scheme:     split[0],
+				Method:     split[1],
+				Identifier: split[2],
+			}
+		} else {
+			message := fmt.Sprintf(`string "%s" is not a valide DID, please check DID syntax at: [https://www.w3.org/TR/did-1.0/#did-syntax]`, did)
+			error = errors.New(message)
+		}
+	} else {
+		message := fmt.Sprintf(`string "%s" is not a valide DID, please check DID syntax at: [https://www.w3.org/TR/did-1.0/#did-syntax]`, did)
+		error = errors.New(message)
+	}
+
+	return result, error
+}
+
+// ValidadeDID validads a string if it follows the did syntax defined in
+// [https://www.w3.org/TR/did-1.0/#did-syntax]
+func ValidadeDID(did string) bool {
+	// source: [https://www.w3.org/TR/did-1.0/#did-syntax]
+	didRegex := regexp.MustCompile(`^did:[a-z0-9]+:([a-zA-Z0-9\.\-_]|%[0-9A-Fa-f]{2})*(:([a-zA-Z0-9\.\-_]|%[0-9A-Fa-f]{2})+)*$`)
+
+	return didRegex.MatchString(did)
 }
 
 // CompareDID compares a DID with a method and / or identifer and / or scheme.
