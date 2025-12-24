@@ -12,7 +12,10 @@ const EntityIdentifier string = "vdr"
 
 type VAR struct{}
 
-var registry []did.DID
+var (
+	registry []did.DID
+	storage  []did.DIDDocument
+)
 
 type CreateDIDArgs struct {
 	Name      string
@@ -20,6 +23,7 @@ type CreateDIDArgs struct {
 	Address   string
 }
 
+// CreatePublicDID adds a new DID to the registry
 func (v *VAR) CreatePublicDID(args *CreateDIDArgs, reply *did.DID) error {
 	var result did.DID
 
@@ -35,6 +39,29 @@ func (v *VAR) CreatePublicDID(args *CreateDIDArgs, reply *did.DID) error {
 	}
 
 	registry = append(registry, result)
+
+	*reply = result
+	return nil
+}
+
+type CreateDIDDocumentArgs struct {
+	Did       string
+	PublicKey string
+}
+
+// CreateDIDDocument adds a new DID Document to the storage with the public key of the did
+func (v *VAR) CreateDIDDocument(args *CreateDIDDocumentArgs, reply *did.DIDDocument) error {
+	didString, err := did.ParseStringToDID(args.Did)
+	if err != nil {
+		return err
+	}
+
+	result := did.DIDDocument{
+		Did:                didString,
+		PublicKeyMultibase: args.PublicKey,
+	}
+
+	storage = append(storage, result)
 
 	*reply = result
 	return nil
