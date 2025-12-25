@@ -18,17 +18,10 @@ var (
 	storage  []did.DIDDocument
 )
 
-type CreateDIDArgs struct {
-	Name      string
-	PublicKey string
-	Address   string
-}
-
 // CreatePublicDID adds a new DID to the registry
-func (v *VAR) CreatePublicDID(args *CreateDIDArgs, reply *did.DID) error {
+func (v *VAR) CreatePublicDID(name string, reply *did.DID) error {
 	var result did.DID
 
-	name := args.Name
 	if did.CompareDIDs(&registry, "did", EntityIdentifier, name) {
 		name += "12"
 	}
