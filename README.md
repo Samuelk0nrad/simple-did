@@ -1,5 +1,17 @@
 ## Simple DID system in GO
 
+```mermaid
+sequenceDiagram
+    participant Holder
+    participant Issuer
+    participant Validator
+    participant VDR as Verifiable Data <br/>Registry <br/>(VDR)
+    
+    Holder->>Issuer: data
+    Issuer->>Holder: Signed Data
+    Holder->>Validator: Signed Data + issuer did
+    Validator->>VDR: Get issuer pk
+```
 
 ### Sources:
 
