@@ -55,7 +55,7 @@ func (d *DID) GetDID() (string, error) {
 	}
 
 	if d.Identifier != "" {
-		result += fmt.Sprintf("%s:", d.Identifier)
+		result += fmt.Sprintf("%v", d.Identifier)
 	} else {
 		error = errors.New("no Identifier set for DID")
 	}

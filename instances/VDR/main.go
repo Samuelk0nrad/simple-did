@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rsa"
 	"errors"
 	"fmt"
 	"net"
@@ -11,7 +12,7 @@ import (
 
 const EntityIdentifier string = "vdr"
 
-type VAR struct{}
+type VDR struct{}
 
 var (
 	registry []did.DID
@@ -19,11 +20,11 @@ var (
 )
 
 // CreatePublicDID adds a new DID to the registry
-func (v *VAR) CreatePublicDID(name string, reply *did.DID) error {
+func (v *VDR) CreatePublicDID(name string, reply *did.DID) error {
 	var result did.DID
 
 	if did.CompareDIDs(&registry, "did", EntityIdentifier, name) {
-		name += "12"
+		name += "12" // WARNING: fix needed !!! random number or standard way
 	}
 
 	result = did.DID{
@@ -34,17 +35,19 @@ func (v *VAR) CreatePublicDID(name string, reply *did.DID) error {
 
 	registry = append(registry, result)
 
+	fmt.Printf("created new DID: %v", result)
+
 	*reply = result
 	return nil
 }
 
 type CreateDIDDocumentArgs struct {
 	Did       string
-	PublicKey string
+	PublicKey rsa.PublicKey
 }
 
 // CreateDIDDocument adds a new DID Document to the storage with the public key of the did
-func (v *VAR) CreateDIDDocument(args *CreateDIDDocumentArgs, reply *did.DIDDocument) error {
+func (v *VDR) CreateDIDDocument(args *CreateDIDDocumentArgs, reply *did.DIDDocument) error {
 	didString, err := did.ParseStringToDID(args.Did)
 	if err != nil {
 		return err
@@ -57,12 +60,14 @@ func (v *VAR) CreateDIDDocument(args *CreateDIDDocumentArgs, reply *did.DIDDocum
 
 	storage = append(storage, result)
 
+	fmt.Printf("created new Did Document: %v ", result)
+
 	*reply = result
 	return nil
 }
 
 // GetDIDDocument retuns the DIDDocument for the assosiated did
-func (v *VAR) GetDIDDocument(didString string, reply *did.DIDDocument) error {
+func (v *VDR) GetDIDDocument(didString string, reply *did.DIDDocument) error {
 	var result did.DIDDocument
 	var error error
 
@@ -91,7 +96,7 @@ func (v *VAR) GetDIDDocument(didString string, reply *did.DIDDocument) error {
 }
 
 func main() {
-	api := new(VAR)
+	api := new(VDR)
 
 	err := rpc.Register(api)
 	if err != nil {
@@ -105,7 +110,7 @@ func main() {
 
 	defer listener.Close()
 
-	fmt.Println("Server is listening on port 6500...")
+	fmt.Println("Server is listening on port 5600...")
 
 	rpc.Accept(listener)
 }

@@ -1,7 +1,8 @@
 package publicregister
 
 import (
-	"crypto"
+	"crypto/rsa"
+	"fmt"
 	"net/rpc"
 
 	"github.com/Samuelk0nrad/simple-did/lib/did"
@@ -9,11 +10,11 @@ import (
 
 type CreateDIDDocumentArgs struct {
 	Did       string
-	PublicKey crypto.PublicKey
+	PublicKey rsa.PublicKey
 }
 
-func RegisterPublicDID(publicKey *crypto.PublicKey, name string) (did.DIDDocument, error) {
-	client, err := rpc.Dial("tcp", "localhost:5435")
+func RegisterPublicDID(publicKey *rsa.PublicKey, name string) (did.DIDDocument, error) {
+	client, err := rpc.Dial("tcp", "localhost:5600")
 	var id did.DID
 	var document did.DIDDocument
 	if err != nil {
@@ -24,6 +25,8 @@ func RegisterPublicDID(publicKey *crypto.PublicKey, name string) (did.DIDDocumen
 	err = client.Call("VDR.CreatePublicDID", name, &id)
 	if err != nil {
 		return document, err
+	} else {
+		fmt.Printf("successfully registered public DID %v", id)
 	}
 
 	didString, err := id.GetDID()
@@ -32,7 +35,7 @@ func RegisterPublicDID(publicKey *crypto.PublicKey, name string) (did.DIDDocumen
 	}
 	didDocumentARgs := CreateDIDDocumentArgs{
 		Did:       didString,
-		PublicKey: publicKey,
+		PublicKey: *publicKey,
 	}
 
 	err = client.Call("VDR.CreateDIDDocument", didDocumentARgs, &document)
