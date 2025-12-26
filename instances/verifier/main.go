@@ -18,7 +18,7 @@ var (
 	Did        did.DID
 )
 
-type Con struct{}
+type Verifier struct{}
 
 type SignedData struct {
 	Data      []byte
@@ -27,28 +27,15 @@ type SignedData struct {
 	Issuer    did.DID
 }
 
-// SignData signs the data with the private Key of the issuer and returs the data, the Signature, the Public Key, and the Issuer Did
-func (c *Con) SignData(data []byte, reply *SignedData) error {
+func (v *Verifier) GetAccess(sdata *SignedData, reply *bool) error {
 	var err error
-	var result SignedData
-	fmt.Printf("data: %v", string(data))
-
-	// sign hashed data (bacause only small data can be hashed)
-	hash := sha256.Sum256(data)
-	signature, err := rsa.SignPKCS1v15(rand.Reader, &PrivateKey, crypto.SHA256, hash[:])
-
-	if err == nil {
-		result = SignedData{
-			Data:      data,
-			Signature: signature,
-			PublicKey: PrivateKey.PublicKey,
-			Issuer:    Did,
-		}
+	hash := sha256.Sum256(sdata.Data)
+	validate := rsa.VerifyPKCS1v15(&sdata.PublicKey, crypto.SHA256, hash[:], sdata.Signature)
+	if validate != nil {
+		err = validate
 	}
 
-	fmt.Println("signed new data")
-
-	*reply = result
+	*reply = true
 	return err
 }
 
@@ -62,7 +49,7 @@ func main() {
 	PrivateKey = *privateKey
 
 	// Register Public DID and Document
-	publicKey := PrivateKey.PublicKey
+	publicKey := privateKey.PublicKey
 	document, err := publicregister.RegisterPublicDID(&publicKey, "issuer")
 	if err != nil {
 		fmt.Printf("and error accured while creating the public DID: %s", err)
@@ -70,21 +57,17 @@ func main() {
 	}
 	Did = document.Did
 
-	// Allow connection to Holder
-
-	connection := new(Con)
-
-	err = rpc.Register(connection)
+	verifier := new(Verifier)
+	err = rpc.Register(verifier)
 	if err != nil {
-		fmt.Printf("error Registering Con: %v", err)
+		fmt.Printf("error registering: %v", err)
 	}
 
-	listener, err := net.Listen("tcp", ":5700")
+	listener, err := net.Listen("tcp", ":5800")
 	if err != nil {
-		fmt.Printf("error listening: %v", err)
+		fmt.Printf("error registering: %v", err)
 	}
 	defer listener.Close()
 
-	fmt.Println("listening on port 5700 ... ")
 	rpc.Accept(listener)
 }
