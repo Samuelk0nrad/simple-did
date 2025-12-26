@@ -9,8 +9,8 @@ sequenceDiagram
     
     Holder->>Issuer: data
     Issuer->>Holder: Signed Data
-    Holder->>Validator: Signed Data + issuer did
-    Validator->>VDR: Get issuer pk
+    Holder->>Validator: Signed Data + issuer did (WIP)
+    Validator->>VDR: Get issuer pk (WIP)
 ```
 
 ### Sources:
