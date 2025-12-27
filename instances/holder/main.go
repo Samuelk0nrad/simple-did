@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/rpc"
 
-	publicregister "github.com/Samuelk0nrad/simple-did/instances/issuer/publicRegister"
+	publicregister "github.com/Samuelk0nrad/simple-did/instances/VDR/publicRegister"
 	"github.com/Samuelk0nrad/simple-did/lib/did"
 )
 
@@ -93,7 +93,7 @@ func main() {
 
 	// -- get Signature from issuer --
 	// create data to sign
-	data := Data{Age: 18, Name: "Simon"}
+	data := Data{Age: 18, Name: "Samuel Konrad"}
 	dataStirng, err := json.Marshal(data)
 	if err != nil {
 		fmt.Printf("error stringifing data: %v", err)
