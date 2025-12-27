@@ -24,7 +24,8 @@ func (v *VDR) CreatePublicDID(name string, reply *did.DID) error {
 	var result did.DID
 
 	if did.CompareDIDs(&registry, "did", EntityIdentifier, name) {
-		name += "12" // WARNING: fix needed !!! random number or standard way
+		message := "name already exists"
+		return errors.New(message)
 	}
 
 	result = did.DID{
